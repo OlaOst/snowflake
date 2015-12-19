@@ -1,0 +1,12 @@
+{
+	"name": "snowflake",
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2015, ola",
+	"authors": ["ola"],
+	"dependencies": {
+    "derelict-sdl2" : "1.9.7",
+    "derelict-gl3" : "1.0.17",
+    "glamour" : "1.0.1",
+    "gl3n" : "1.2.0",
+	}
+}
