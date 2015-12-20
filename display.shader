@@ -30,9 +30,9 @@ fragment:
     vec2 coord = gl_FragCoord.xy * scale;
     vec4 state = texture(textureMap, fixedCoord(gl_FragCoord.xy * scale));
     
-    /*if (state.r < 0.9)
+    if (state.r < 0.9)
       color.r = state.r;
-    else*/
+    else
       color.r = 0;//state.b;
     color.g = state.b;
     if (state.b > 0)
