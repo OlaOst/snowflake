@@ -31,13 +31,34 @@ fragment:
     vec4 s  = get( 0, -1);
     vec4 se = get( 1, -1);
     
-    float water = (nw.r + n.r + ne.r + w.r + c.r + e.r + sw.r + s.r + se.r) / 9.0;
+    vec4 average = (nw + n + ne + w + c + e + sw + s + se) * (1.0 / 9.0);
     
+    float water = average.r;
     float slush = c.g;
     float ice = c.b;
+    float surroundingIce = average.b - ice;
+    
+    // part of water in cell in contact with ice will turn into slush
+    // slush will turn into ice if slush > water
+    float waterToSlushFactor = 0.1;
+    if (surroundingIce > 0.1)
+    {
+      float waterToSlush = water * waterToSlushFactor;
+      
+      water -= waterToSlush;
+      water = 0.0;
+      slush += waterToSlush;
+    }
+    
+    if (slush > 0.5)
+    {
+      ice = 1.0;
+      slush = 0.0;
+    }
     
     color = c;
-    
     color.r = water;
+    color.g = slush;
+    color.b = ice;
   }
   

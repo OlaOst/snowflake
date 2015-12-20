@@ -36,10 +36,22 @@ void main()
   
   auto textures = [new Texture2D(), new Texture2D()];
   
+  foreach (texture; textures)
+  {
+    texture.set_parameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    texture.set_parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    texture.set_parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    texture.set_parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  }
+  
   ubyte[] data = ubyte.min.repeat.take(textureSize * textureSize * 4).array;
   for (int y = 0; y < textureSize; y++)
     for (int x = 0; x < textureSize; x++)
-      data[y * textureSize * 4 + x * 4 + 0] = uniform(ubyte.min, ubyte.max);
+      data[y * textureSize * 4 + x * 4 + 0] = ubyte.max; //uniform(ubyte.min, ubyte.max);
+  
+  // ice seed in the middle
+  data[(textureSize/2) * textureSize * 4 + (textureSize/2) * 4 + 2] = ubyte.max;
+  
   textures.each!(texture => texture.set_data(data, GL_RGBA, textureSize, textureSize, GL_RGBA, GL_UNSIGNED_BYTE));
   
   SDL_Event event;
