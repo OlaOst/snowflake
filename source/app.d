@@ -47,7 +47,7 @@ void main()
   ubyte[] data = ubyte.min.repeat.take(textureSize * textureSize * 4).array;
   for (int y = 0; y < textureSize; y++)
     for (int x = 0; x < textureSize; x++)
-      data[y * textureSize * 4 + x * 4 + 0] = ubyte.max; //uniform(ubyte.min, ubyte.max);
+      data[y * textureSize * 4 + x * 4 + 0] = cast(ubyte)(0.99 * 256); //uniform(ubyte.min, ubyte.max);
   
   // ice seed in the middle
   data[(textureSize/2) * textureSize * 4 + (textureSize/2) * 4 + 2] = ubyte.max;
@@ -60,13 +60,26 @@ void main()
   {
     SDL_PollEvent(&event);
     
+    if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_r)
+    {
+      textures.each!(texture => texture.set_data(data, GL_RGBA, textureSize, textureSize, GL_RGBA, GL_UNSIGNED_BYTE));
+      
+      diffusionFactor = uniform(0.1, 0.9);
+      waterToSlushFactor = uniform(0.1, 0.9);
+      freezingFactor = uniform(0.1, 0.9);
+    }
+    
     index++;
-    auto front = index % 2;
-    auto back = (index+1) % 2;
     
-    stepAutomata(frameBuffer, textures[front], textures[back], textureSize, vertexBuffer, snowflakeShader);
+    //if ((index % 3) == 0)
+    {
+      auto front = index % 2;
+      auto back = (index+1) % 2;
+      
+      stepAutomata(frameBuffer, textures[front], textures[back], textureSize, vertexBuffer, snowflakeShader);
+    }
     
-    if ((index % 30) == 0)
+    if ((index % 2) == 0)
       toScreen(frameBuffer, displayShader, vertexBuffer, window);
   }
   
@@ -77,6 +90,10 @@ void main()
   vertexBuffer.remove();
   vao.remove();
 }
+
+float diffusionFactor = 0.5;
+float waterToSlushFactor = 0.3;
+float freezingFactor = 0.9;
 
 void stepAutomata(FrameBuffer frameBuffer, Texture2D front, Texture2D back, int textureSize, Buffer vertexBuffer, Shader snowflakeShader)
 {
@@ -92,6 +109,9 @@ void stepAutomata(FrameBuffer frameBuffer, Texture2D front, Texture2D back, int 
   vertexBuffer.bind(snowflakeShader, "position", GL_FLOAT, 2, 0, 0);
   
   snowflakeShader.uniform1f("scale", 1.0 / textureSize);
+  snowflakeShader.uniform1f("diffusionFactor", diffusionFactor);
+  snowflakeShader.uniform1f("waterToSlushFactor", waterToSlushFactor);
+  snowflakeShader.uniform1f("freezingFactor", freezingFactor);
   
   checkgl!glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
   
