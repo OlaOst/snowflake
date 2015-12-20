@@ -30,7 +30,7 @@ void main()
   auto snowflakeShader = new Shader("snowflake.shader");
   auto displayShader = new Shader("display.shader");
   
-  int textureSize = 64;
+  int textureSize = 512;
   
   auto frameBuffer = new FrameBuffer();
   
@@ -66,7 +66,8 @@ void main()
     
     stepAutomata(frameBuffer, textures[front], textures[back], textureSize, vertexBuffer, snowflakeShader);
     
-    toScreen(frameBuffer, displayShader, vertexBuffer, window);
+    if ((index % 30) == 0)
+      toScreen(frameBuffer, displayShader, vertexBuffer, window);
   }
   
   frameBuffer.remove();

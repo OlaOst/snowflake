@@ -51,7 +51,7 @@ fragment:
       slush += waterToSlush;
     }
     
-    if (slush > 0.5)
+    if (slush > 0.9)
     {
       ice = 1.0;
       slush = 0.0;
