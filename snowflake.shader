@@ -31,7 +31,8 @@ fragment:
     vec4 s  = get( 0, -1);
     vec4 se = get( 1, -1);
     
-    vec4 average = (nw + n + ne + w + c + e + sw + s + se) * (1.0 / 9.0);
+    //vec4 average = (nw + n + ne + w + c + e + sw + s + se) * (1.0 / 9.0);
+    vec4 average = (n + ne + w + c + e + sw + s) * (1.0 / 7.0);
     
     float water = average.r;
     float slush = c.g;
