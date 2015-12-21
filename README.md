@@ -1,5 +1,5 @@
 # snowflake
-Get [url=dlang.org/download.html]dmd compiler[/url]
-Get [url=code.dlang.org]dub package manager[/url]
+Get dmd compiler from http://dlang.org/download.html
+Get dub package manager from http://code.dlang.org/download
 Run dub in /snowflake
-PUsh r for new snowflake
+Push r for new snowflake
