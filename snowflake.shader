@@ -83,8 +83,13 @@ fragment:
       {
         ice = slush+water;
         slush = 0;
-        //water = 0;
+        water = 0;
       }
+    }
+    
+    if (ice > 0.9)
+    {
+      water = 0;
     }
     
     color.r = water;

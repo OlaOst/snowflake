@@ -30,7 +30,7 @@ void main()
   auto snowflakeShader = new Shader("snowflake.shader");
   auto displayShader = new Shader("display.shader");
   
-  int textureSize = 512;
+  int textureSize = 1024;
   
   auto frameBuffer = new FrameBuffer();
   
@@ -67,7 +67,17 @@ void main()
       diffusionFactor = uniform(0.1, 0.9);
       waterToSlushFactor = uniform(0.1, 0.9);
       freezingFactor = uniform(0.1, 0.9);
+      
+      writeln();  
+      writeln("Diffusion factor: ", diffusionFactor);
+      writeln("Slush factor:     ", waterToSlushFactor);
+      writeln("Freezing factor:  ", freezingFactor);
     }
+    
+    // brownian motion
+    for (int i = 0; i < 20; i++)
+      diffusionFactor += uniform(-0.01, 0.01);
+    diffusionFactor = std.algorithm.clamp(diffusionFactor, 0.01, 0.99);
     
     index++;
     
