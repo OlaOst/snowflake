@@ -4,7 +4,6 @@ import std.range;
 import std.stdio;
 
 import derelict.opengl3.gl;
-import derelict.sdl2.image;
 import derelict.sdl2.sdl;
 
 import gl3n.linalg;
@@ -52,44 +51,47 @@ void main()
   // ice seed in the middle
   data[(textureSize/2) * textureSize * 4 + (textureSize/2) * 4 + 2] = ubyte.max;
   
-  textures.each!(texture => texture.set_data(data, GL_RGBA, textureSize, textureSize, GL_RGBA, GL_UNSIGNED_BYTE));
+  // try a line
+  //for (int x = textureSize/3; x < textureSize/3*2; x++)
+    //data[x * textureSize * 4 + x * 4 + 2] = ubyte.max;
+  
+  //textures.each!(texture => texture.set_data(data, GL_RGBA, textureSize, textureSize, GL_RGBA, GL_UNSIGNED_BYTE));
+  
+  reset(textures, data, textureSize);
   
   SDL_Event event;
-  int index = 0;
-  while (event.key.keysym.sym != SDLK_ESCAPE)
+  int iteration = 0;
+  while (event.key.keysym.sym != SDLK_ESCAPE && event.type != SDL_QUIT)
   {
     SDL_PollEvent(&event);
     
     if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_r)
     {
-      textures.each!(texture => texture.set_data(data, GL_RGBA, textureSize, textureSize, GL_RGBA, GL_UNSIGNED_BYTE));
-      
-      diffusionFactor = uniform(0.1, 0.9);
-      waterToSlushFactor = uniform(0.1, 0.9);
-      freezingFactor = uniform(0.1, 0.9);
-      
-      writeln();  
-      writeln("Diffusion factor: ", diffusionFactor);
-      writeln("Slush factor:     ", waterToSlushFactor);
-      writeln("Freezing factor:  ", freezingFactor);
+      reset(textures, data, textureSize);
     }
     
     // brownian motion
-    for (int i = 0; i < 20; i++)
-      diffusionFactor += uniform(-0.01, 0.01);
-    diffusionFactor = std.algorithm.clamp(diffusionFactor, 0.01, 0.99);
-    
-    index++;
-    
-    //if ((index % 3) == 0)
+    for (int i = 0; i < 25; i++)
     {
-      auto front = index % 2;
-      auto back = (index+1) % 2;
+      diffusionFactor += uniform(-0.01, 0.01);
+      //waterToSlushFactor += uniform(-0.005, 0.005);
+      //freezingFactor += uniform(-0.005, 0.005);
+    }
+    diffusionFactor = std.algorithm.clamp(diffusionFactor, 0.01, 0.99);
+    waterToSlushFactor = std.algorithm.clamp(waterToSlushFactor, 0.01, 0.99);
+    freezingFactor = std.algorithm.clamp(freezingFactor, 0.01, 0.99);
+    
+    iteration++;
+    
+    //if ((iteration % 3) == 0)
+    {
+      auto front = iteration % 2;
+      auto back = (iteration+1) % 2;
       
-      stepAutomata(frameBuffer, textures[front], textures[back], textureSize, vertexBuffer, snowflakeShader);
+      stepAutomata(frameBuffer, textures[front], textures[back], textureSize, vertexBuffer, snowflakeShader, iteration);
     }
     
-    if ((index % 2) == 0)
+    if ((iteration % 10) == 0)
       toScreen(frameBuffer, displayShader, vertexBuffer, window);
   }
   
@@ -101,11 +103,26 @@ void main()
   vao.remove();
 }
 
-float diffusionFactor = 0.5;
-float waterToSlushFactor = 0.3;
-float freezingFactor = 0.9;
+float diffusionFactor;
+float waterToSlushFactor;
+float freezingFactor;
 
-void stepAutomata(FrameBuffer frameBuffer, Texture2D front, Texture2D back, int textureSize, Buffer vertexBuffer, Shader snowflakeShader)
+void reset(Texture2D[] textures, ubyte[] data, int textureSize)
+{
+  textures.each!(texture => texture.set_data(data, GL_RGBA, textureSize, textureSize, GL_RGBA, GL_UNSIGNED_BYTE));
+      
+  diffusionFactor = uniform(0.1, 0.9);
+  //diffusionFactor = 0.5;
+  waterToSlushFactor = uniform(0.1, 0.9);
+  freezingFactor = uniform(0.1, 0.9);
+  
+  writeln();  
+  writeln("Diffusion factor: ", diffusionFactor);
+  writeln("Slush factor:     ", waterToSlushFactor);
+  writeln("Freezing factor:  ", freezingFactor);
+}
+
+void stepAutomata(FrameBuffer frameBuffer, Texture2D front, Texture2D back, int textureSize, Buffer vertexBuffer, Shader snowflakeShader, int iteration)
 {
   frameBuffer.bind();
   frameBuffer.attach(back, GL_COLOR_ATTACHMENT0);
@@ -122,6 +139,7 @@ void stepAutomata(FrameBuffer frameBuffer, Texture2D front, Texture2D back, int 
   snowflakeShader.uniform1f("diffusionFactor", diffusionFactor);
   snowflakeShader.uniform1f("waterToSlushFactor", waterToSlushFactor);
   snowflakeShader.uniform1f("freezingFactor", freezingFactor);
+  snowflakeShader.uniform1i("iteration", iteration);
   
   checkgl!glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
   
@@ -145,17 +163,15 @@ void toScreen(FrameBuffer frameBuffer, Shader displayShader, Buffer vertexBuffer
   checkgl!glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-immutable int screenWidth = 800;
-immutable int screenHeight = 600;
+immutable int screenWidth = 1024;
+immutable int screenHeight = 768;
 
 SDL_Window* init()
 {
   DerelictSDL2.load();
-  DerelictSDL2Image.load();
   DerelictGL3.load();
   
   SDL_Init(SDL_INIT_VIDEO);
-  IMG_Init(0);
   
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);

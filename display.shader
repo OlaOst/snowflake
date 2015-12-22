@@ -5,7 +5,7 @@ vertex:
 
   void main()
   {    
-    gl_Position = vec4(position*0.9, 0, 1);
+    gl_Position = vec4(position*1.0, 0, 1);
   }
 
 fragment:
@@ -41,9 +41,10 @@ fragment:
       color.b = 1-state.r;*/
     
     color = state;
-    color.r = 1 - state.r;
-    color.g = state.g * 10;// + 1 - state.r;
-    color.b = state.b * 10;// + 1 - state.r;
-    color.a = state.a;
+    color.r = state.a - state.r*state.a;
+    color.g = state.g * 1 + state.b*1;// + 1 - state.r;
+    color.b = 1 - state.r + state.b*1;// + 1 - state.r;
+    //color.a = state.a;
+    color.a = 1.0;
   }
   

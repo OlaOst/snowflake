@@ -15,6 +15,7 @@ fragment:
   uniform float diffusionFactor;
   uniform float waterToSlushFactor;
   uniform float freezingFactor;
+  uniform int iteration;
   
   out vec4 color;
   
@@ -95,6 +96,9 @@ fragment:
     color.r = water;
     color.g = slush;
     color.b = ice;
-    color.a = c.a;
+    //color.a = c.a;
+    
+    if (ice > 0 && c.a == 0)
+      color.a = (sin(iteration * 0.05) + 0.5);
   }
   
