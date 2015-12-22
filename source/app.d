@@ -35,18 +35,11 @@ void main()
   
   auto textures = [new Texture2D(), new Texture2D()];
   
-  foreach (texture; textures)
-  {
-    texture.set_parameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    texture.set_parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    texture.set_parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    texture.set_parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  }
-  
   ubyte[] data = ubyte.min.repeat.take(textureSize * textureSize * 4).array;
   for (int y = 0; y < textureSize; y++)
     for (int x = 0; x < textureSize; x++)
       data[y * textureSize * 4 + x * 4 + 0] = cast(ubyte)(0.99 * 256); //uniform(ubyte.min, ubyte.max);
+      //data[y * textureSize * 4 + x * 4 + 0] = uniform(ubyte.min, ubyte.max);
   
   // ice seed in the middle
   data[(textureSize/2) * textureSize * 4 + (textureSize/2) * 4 + 2] = ubyte.max;
@@ -74,8 +67,8 @@ void main()
     for (int i = 0; i < 25; i++)
     {
       diffusionFactor += uniform(-0.01, 0.01);
-      //waterToSlushFactor += uniform(-0.005, 0.005);
-      //freezingFactor += uniform(-0.005, 0.005);
+      waterToSlushFactor += uniform(-0.01, 0.01);
+      //freezingFactor += uniform(-0.01, 0.01);
     }
     diffusionFactor = std.algorithm.clamp(diffusionFactor, 0.01, 0.99);
     waterToSlushFactor = std.algorithm.clamp(waterToSlushFactor, 0.01, 0.99);
@@ -110,6 +103,14 @@ float freezingFactor;
 void reset(Texture2D[] textures, ubyte[] data, int textureSize)
 {
   textures.each!(texture => texture.set_data(data, GL_RGBA, textureSize, textureSize, GL_RGBA, GL_UNSIGNED_BYTE));
+      
+  foreach (texture; textures)
+  {
+    texture.set_parameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    texture.set_parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    texture.set_parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    texture.set_parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  }
       
   diffusionFactor = uniform(0.1, 0.9);
   //diffusionFactor = 0.5;
